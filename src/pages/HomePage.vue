@@ -14,7 +14,7 @@ defineOptions({
 });
 
 let displayedText = ref('');
-let text = "Hello, I'm YOLA!";
+let text = "Hello, I'm Yola";
 
 let index = 0;
 let speed = 90;
