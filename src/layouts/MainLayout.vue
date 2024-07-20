@@ -62,6 +62,12 @@ const linksList: EssentialLinkProps[] = [
     icon: 'calculate',
     link: '/calculate',
   },
+  {
+    title: '拼音',
+    icon: 'flutter_dash',
+    link: '/pinyin',
+    disable: true,
+  },
 ];
 
 const leftDrawerOpen = ref(false);

@@ -8,6 +8,7 @@ const routes: RouteRecordRaw[] = [
       { path: '', redirect: '/home' },
       { path: 'home', component: () => import('pages/HomePage.vue') },
       { path: 'calculate', component: () => import('pages/CalculatePage.vue') },
+      { path: 'pinyin', component: () => import('pages/CalculatePage.vue') },
     ],
   },
 
