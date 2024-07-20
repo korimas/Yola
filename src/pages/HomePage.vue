@@ -1,7 +1,7 @@
 <template>
   <q-page class="row items-center justify-center">
     <div class="container">
-      <h1 class="title">{{ displayedText }}</h1>
+      <h2 class="title">{{ displayedText }}</h2>
     </div>
   </q-page>
 </template>
@@ -17,12 +17,14 @@ let displayedText = ref('');
 let text = 'Hello, I am YOLA!';
 
 let index = 0;
+let speed = 90;
 const timer = setInterval(() => {
   if (index < text.length) {
     displayedText.value += text.charAt(index);
     index++;
+    speed = Math.floor(Math.random() * 101);
   } else {
     clearInterval(timer);
   }
-}, 100);
+}, speed);
 </script>
