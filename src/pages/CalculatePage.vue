@@ -1,12 +1,25 @@
 <template>
   <q-page class="row items-center justify-evenly">
     <div class="container">
-      <h2 class="title">{{ num1 }} {{ operator }} {{ num2 }} = ?</h2>
+      <div>
+        <span style="font-size: 20px"
+          >出题：{{ total_count }} , 答对：{{ correct_count }} , 答错：{{
+            wrong_count
+          }}</span
+        >
+      </div>
+      <div>
+        <span style="font-size: 55px"
+          >{{ num1 }} {{ operator }} {{ num2 }} = {{ display_result }}</span
+        >
+        <!-- <q-icon size="md" name="done" /> -->
+        <q-icon v-if="is_wrong" size="md" name="close" />
+      </div>
       <q-input
         v-model="input_result"
         outlined
         dense
-        style="width: 100px"
+        class="full-width"
         @update:model-value="checkResult"
       />
     </div>
@@ -23,9 +36,15 @@ defineOptions({
 let num1 = ref('0');
 let operator = ref('+');
 let num2 = ref('0');
+let display_result = ref('?');
 let result = ref(0);
 let input_result = ref('');
 let timeoutId: NodeJS.Timeout | undefined;
+let total_count = ref(0);
+let correct_count = ref(0);
+let wrong_count = ref(0);
+let same_question = false;
+let is_wrong = false;
 
 function generate() {
   const operators = ['+', '-'];
@@ -47,18 +66,32 @@ function generate() {
 }
 
 function checkResult() {
-  if (Number(input_result.value) === result.value) {
-    generate();
+  display_result.value = input_result.value;
+  is_wrong = false;
 
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-
-    timeoutId = setTimeout(() => {
-      input_result.value = '';
-    }, 100);
+  if (timeoutId) {
+    clearTimeout(timeoutId);
   }
+
+  timeoutId = setTimeout(() => {
+    if (Number(input_result.value) === result.value) {
+      generate();
+      total_count.value += 1;
+      correct_count.value += 1;
+      same_question = false;
+      console.log('correct');
+      display_result.value = '?';
+    } else {
+      if (!same_question) {
+        wrong_count.value += 1;
+      }
+      same_question = true;
+      is_wrong = true;
+    }
+    input_result.value = '';
+  }, 650);
 }
 
 generate();
+total_count.value += 1;
 </script>
