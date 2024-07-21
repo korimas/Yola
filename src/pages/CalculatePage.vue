@@ -17,7 +17,7 @@
         </q-chip>
       </div>
       <q-space />
-      <div>
+      <div style="margin-top: 66px; margin-bottom: 66px">
         <span style="font-size: 55px"
           >{{ num1 }} {{ operator }} {{ num2 }} = {{ display_result }}</span
         >
@@ -30,7 +30,9 @@
         dense
         class="full-width"
         @update:model-value="checkResult"
-      />
+      >
+        <template v-slot:before> 解答: </template>
+      </q-input>
     </div>
   </q-page>
 </template>
