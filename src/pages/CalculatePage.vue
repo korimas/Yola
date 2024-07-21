@@ -76,10 +76,11 @@ function checkResult() {
   timeoutId = setTimeout(() => {
     if (Number(input_result.value) === result.value) {
       generate();
+      if (!same_question) {
+        correct_count.value += 1;
+      }
       total_count.value += 1;
-      correct_count.value += 1;
       same_question = false;
-      console.log('correct');
       display_result.value = '?';
     } else {
       if (!same_question) {
