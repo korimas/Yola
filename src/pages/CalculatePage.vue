@@ -1,13 +1,20 @@
 <template>
   <q-page class="row items-center justify-evenly">
     <div class="container">
-      <div>
-        <span style="font-size: 20px"
-          >出题：{{ total_count }} , 答对：{{ correct_count }} , 答错：{{
-            wrong_count
-          }}</span
-        >
+      <div class="row">
+        <q-chip square>
+          <q-avatar color="teal" text-color="white">{{
+            correct_count
+          }}</q-avatar>
+          答对
+        </q-chip>
+        <q-space />
+        <q-chip square>
+          <q-avatar color="red" text-color="white">{{ wrong_count }}</q-avatar>
+          答错
+        </q-chip>
       </div>
+      <q-space />
       <div>
         <span style="font-size: 55px"
           >{{ num1 }} {{ operator }} {{ num2 }} = {{ display_result }}</span
