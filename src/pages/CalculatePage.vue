@@ -97,7 +97,7 @@ function checkResult() {
       is_wrong = true;
     }
     input_result.value = '';
-  }, 650);
+  }, 800);
 }
 
 generate();
