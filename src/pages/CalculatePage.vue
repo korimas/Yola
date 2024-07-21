@@ -9,6 +9,8 @@
           答对
         </q-chip>
         <q-space />
+        <span style="font-size: 22px">{{ minutes }}:{{ seconds }}</span>
+        <q-space />
         <q-chip square>
           <q-avatar color="red" text-color="white">{{ wrong_count }}</q-avatar>
           答错
@@ -52,6 +54,8 @@ let correct_count = ref(0);
 let wrong_count = ref(0);
 let same_question = false;
 let is_wrong = false;
+let minutes = ref(0);
+let seconds = ref(0);
 
 function generate() {
   const operators = ['+', '-'];
@@ -71,6 +75,14 @@ function generate() {
   operator.value = randomOperator;
   result.value = eval(`${num1.value} ${randomOperator} ${num2.value}`);
 }
+
+setInterval(() => {
+  if (seconds.value === 59) {
+    minutes.value += 1;
+    seconds.value = 0;
+  }
+  seconds.value += 1;
+}, 1000);
 
 function checkResult() {
   display_result.value = input_result.value;
