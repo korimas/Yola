@@ -47,18 +47,32 @@
     v-model="WrongListDrawerOpen"
     overlay
   >
-    <q-list bordered separator>
-      <q-item
-        clickable
-        v-ripple
-        v-for="item in wrong_list"
-        :key="item.id"
-        v-bind="item"
-      >
-        <q-item-section>{{ item.question }}</q-item-section>
-        <q-icon v-if="is_wrong" size="md" name="close" color="red" />
-      </q-item>
-    </q-list>
+    <div class="q-pa-md row" style="height: 65px">
+      <div class="text-h6">错题集</div>
+      <q-space></q-space>
+      <q-btn
+        unelevated
+        size="12px"
+        icon="clear"
+        color="red"
+        @click="WrongListDrawerOpen = false"
+      />
+    </div>
+    <q-separator />
+    <q-scroll-area style="height: calc(100% - 66px)">
+      <q-list bordered separator>
+        <q-item
+          clickable
+          v-ripple
+          v-for="item in wrong_list"
+          :key="item.id"
+          v-bind="item"
+        >
+          <q-icon v-if="is_wrong" size="md" name="close" color="red" />
+          <q-item-section>{{ item.question }}</q-item-section>
+        </q-item>
+      </q-list>
+    </q-scroll-area>
   </q-drawer>
 </template>
 
@@ -94,6 +108,19 @@ interface WrongItem {
 }
 
 function generate() {
+  // 五分之一的概率从错题集中出题
+  if (Math.random() < 0.2 && wrong_list.value.length > 0) {
+    const randomIndex = Math.floor(Math.random() * wrong_list.value.length);
+    const randomWrongItem = wrong_list.value[randomIndex];
+    const [num1_t, operator_t, num2_t] = randomWrongItem.question.split(' ');
+    num1.value = num1_t;
+    operator.value = operator_t;
+    num2.value = num2_t;
+    result.value = Number(randomWrongItem.correct_answer);
+    return;
+  }
+
+  // 出新题
   const operators = ['+', '-'];
   const randomOperator =
     operators[Math.floor(Math.random() * operators.length)];
@@ -112,6 +139,7 @@ function generate() {
   result.value = eval(`${num1.value} ${randomOperator} ${num2.value}`);
 }
 
+// 计时器
 setInterval(() => {
   if (seconds.value === 59) {
     minutes.value += 1;
@@ -120,6 +148,7 @@ setInterval(() => {
   seconds.value += 1;
 }, 1000);
 
+// 延时检查输入答案
 function checkResult() {
   display_result.value = input_result.value;
   is_wrong = false;
