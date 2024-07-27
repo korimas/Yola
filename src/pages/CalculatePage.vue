@@ -1,6 +1,16 @@
 <template>
   <q-page class="row items-center justify-evenly">
     <div>
+      <q-input
+        v-model="end_number"
+        type="number"
+        dense
+        style="width: 235px; margin-bottom: 30px"
+        outlined
+      >
+        <template v-slot:before> 从0到</template>
+        <template v-slot:after> 的加减法</template>
+      </q-input>
       <div class="row">
         <q-chip square>
           <q-avatar color="teal" text-color="white">{{
@@ -98,7 +108,8 @@ let is_wrong = false;
 let minutes = ref(0);
 let seconds = ref(0);
 let wrong_list = ref<WrongItem[]>([]);
-let WrongListDrawerOpen = ref(true);
+let WrongListDrawerOpen = ref(false);
+let end_number = ref(20);
 
 interface WrongItem {
   id: number;
@@ -124,8 +135,8 @@ function generate() {
   const operators = ['+', '-'];
   const randomOperator =
     operators[Math.floor(Math.random() * operators.length)];
-  const num1_t = Math.floor(Math.random() * 19) + 1;
-  const num2_t = Math.floor(Math.random() * 19) + 1;
+  const num1_t = Math.floor(Math.random() * end_number.value - 1) + 1;
+  const num2_t = Math.floor(Math.random() * end_number.value - 1) + 1;
 
   if (randomOperator === '-') {
     [num1.value, num2.value] = [
