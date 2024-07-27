@@ -1,6 +1,6 @@
 <template>
   <q-page class="row items-center justify-evenly">
-    <div class="container">
+    <div>
       <div class="row">
         <q-chip square>
           <q-avatar color="teal" text-color="white">{{
@@ -11,7 +11,11 @@
         <q-space />
         <span style="font-size: 22px">{{ minutes }}:{{ seconds }}</span>
         <q-space />
-        <q-chip square>
+        <q-chip
+          square
+          clickable
+          @click="WrongListDrawerOpen = !WrongListDrawerOpen"
+        >
           <q-avatar color="red" text-color="white">{{ wrong_count }}</q-avatar>
           答错
         </q-chip>
@@ -22,7 +26,7 @@
           >{{ num1 }} {{ operator }} {{ num2 }} = {{ display_result }}</span
         >
         <!-- <q-icon size="md" name="done" /> -->
-        <q-icon v-if="is_wrong" size="md" name="close" />
+        <q-icon v-if="is_wrong" size="md" name="close" color="red" />
       </div>
       <q-input
         v-model="input_result"
@@ -35,6 +39,27 @@
       </q-input>
     </div>
   </q-page>
+
+  <q-drawer
+    elevated
+    side="right"
+    :width="$q.screen.width > 600 ? 500 : $q.screen.width * 0.8"
+    v-model="WrongListDrawerOpen"
+    overlay
+  >
+    <q-list bordered separator>
+      <q-item
+        clickable
+        v-ripple
+        v-for="item in wrong_list"
+        :key="item.id"
+        v-bind="item"
+      >
+        <q-item-section>{{ item.question }}</q-item-section>
+        <q-icon v-if="is_wrong" size="md" name="close" color="red" />
+      </q-item>
+    </q-list>
+  </q-drawer>
 </template>
 
 <script setup lang="ts">
@@ -58,6 +83,15 @@ let same_question = false;
 let is_wrong = false;
 let minutes = ref(0);
 let seconds = ref(0);
+let wrong_list = ref<WrongItem[]>([]);
+let WrongListDrawerOpen = ref(true);
+
+interface WrongItem {
+  id: number;
+  question: string;
+  wrong_answer: string;
+  correct_answer: string;
+}
 
 function generate() {
   const operators = ['+', '-'];
@@ -109,6 +143,12 @@ function checkResult() {
       }
       same_question = true;
       is_wrong = true;
+      wrong_list.value.push({
+        id: wrong_list.value.length + 1,
+        question: `${num1.value} ${operator.value} ${num2.value} = ${input_result.value}`,
+        wrong_answer: input_result.value,
+        correct_answer: result.value.toString(),
+      });
     }
     input_result.value = '';
   }, 800);
