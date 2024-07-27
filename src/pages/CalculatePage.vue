@@ -1,16 +1,6 @@
 <template>
   <q-page class="row items-center justify-evenly">
     <div>
-      <q-input
-        v-model="end_number"
-        type="number"
-        dense
-        style="width: 235px; margin-bottom: 30px"
-        outlined
-      >
-        <template v-slot:before> 从0到</template>
-        <template v-slot:after> 的加减法</template>
-      </q-input>
       <div class="row">
         <q-chip square>
           <q-avatar color="teal" text-color="white">{{
@@ -46,6 +36,13 @@
         @update:model-value="checkResult"
       >
         <template v-slot:before> 解答: </template>
+        <template v-slot:after>
+          <q-btn
+            flat
+            size="md"
+            icon="settings"
+            @click="CalculateSettingDrawerOpen = !CalculateSettingDrawerOpen"
+        /></template>
       </q-input>
     </div>
   </q-page>
@@ -84,6 +81,41 @@
       </q-list>
     </q-scroll-area>
   </q-drawer>
+
+  <q-drawer
+    elevated
+    side="right"
+    :width="$q.screen.width > 600 ? 500 : $q.screen.width * 0.8"
+    v-model="CalculateSettingDrawerOpen"
+    overlay
+  >
+    <div class="q-pa-md row" style="height: 65px">
+      <div class="text-h6">配置</div>
+      <q-space></q-space>
+      <q-btn
+        unelevated
+        size="12px"
+        icon="clear"
+        color="red"
+        @click="CalculateSettingDrawerOpen = false"
+      />
+    </div>
+    <q-separator />
+    <q-scroll-area style="height: calc(100% - 66px)">
+      <div class="q-pa-md q-gutter-md">
+        <q-input
+          v-model="end_number"
+          type="number"
+          dense
+          style="width: 235px; margin-bottom: 30px"
+          outlined
+        >
+          <template v-slot:before> 从0到</template>
+          <template v-slot:after> 的加减法</template>
+        </q-input>
+      </div>
+    </q-scroll-area>
+  </q-drawer>
 </template>
 
 <script setup lang="ts">
@@ -109,6 +141,7 @@ let minutes = ref(0);
 let seconds = ref(0);
 let wrong_list = ref<WrongItem[]>([]);
 let WrongListDrawerOpen = ref(false);
+let CalculateSettingDrawerOpen = ref(false);
 let end_number = ref(20);
 
 interface WrongItem {
