@@ -169,7 +169,7 @@ let end_number = ref(20);
 // 记忆曲线
 let need_retest: QuestionItem[] = [];
 let insert_wrong: QuestionItem | null = null;
-const memoryCurveIntervals = [5000, 10000, 30000]; // 间隔时间 (以毫秒为单位) 模拟记忆曲线
+const memoryCurveIntervals = [60000, 150000, 300000]; // 间隔时间 (以毫秒为单位) 模拟记忆曲线
 
 interface QuestionItem {
   id: number;
