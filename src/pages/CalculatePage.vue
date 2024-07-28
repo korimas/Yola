@@ -33,6 +33,7 @@
         outlined
         dense
         class="full-width"
+        type="number"
         @update:model-value="checkResult"
       >
         <template v-slot:before> 解答: </template>
@@ -76,7 +77,10 @@
           v-bind="item"
         >
           <q-icon v-if="is_wrong" size="md" name="close" color="red" />
-          <q-item-section>{{ item.question }}</q-item-section>
+          <q-item-section
+            >{{ item.num1 }} {{ item.operator }} {{ item.num2 }} =
+            {{ item.wrong_answer }}</q-item-section
+          >
         </q-item>
       </q-list>
     </q-scroll-area>
@@ -125,47 +129,50 @@ defineOptions({
   name: 'CalculatePage',
 });
 
-let num1 = ref('0');
+// 计算题组成
+let num1 = ref(0);
 let operator = ref('+');
-let num2 = ref('0');
-let display_result = ref('?');
-let result = ref(0);
-let input_result = ref('');
-let timeoutId: NodeJS.Timeout | undefined;
-let total_count = ref(0);
-let correct_count = ref(0);
-let wrong_count = ref(0);
+let num2 = ref(0);
+let display_result = ref('?'); // 用于显示用户的输入
+const operators = ['+', '-'];
+let result = ref(0); // 正确结果
+let timeoutId: NodeJS.Timeout | undefined; // 检查延时的计时器ID
+let check_delay = 800; // 检查延时(ms)
+
+// 答题输入
+let input_result = ref<number | null>(null); // 绑定用户输入的input
+
+// 答题统计
+let total_count = ref(0); // 总题数
+let correct_count = ref(0); // 答对题数
+let wrong_count = ref(0); // 答错题数
 let same_question = false;
 let is_wrong = false;
+let wrong_list = ref<WrongItem[]>([]);
+let need_retest = [];
+let WrongListDrawerOpen = ref(false);
+
+// 答题计时
 let minutes = ref(0);
 let seconds = ref(0);
-let wrong_list = ref<WrongItem[]>([]);
-let WrongListDrawerOpen = ref(false);
+
+// 配置
 let CalculateSettingDrawerOpen = ref(false);
 let end_number = ref(20);
 
+// 记忆曲线
+// const memoryCurveIntervals = [60000, 150000, 300000]; // 间隔时间 (以毫秒为单位) 模拟记忆曲线
+
 interface WrongItem {
   id: number;
-  question: string;
-  wrong_answer: string;
-  correct_answer: string;
+  num1: number;
+  operator: string;
+  num2: number;
+  wrong_answer: number | null;
 }
 
-function generate() {
-  // 五分之一的概率从错题集中出题
-  if (Math.random() < 0.2 && wrong_list.value.length > 0) {
-    const randomIndex = Math.floor(Math.random() * wrong_list.value.length);
-    const randomWrongItem = wrong_list.value[randomIndex];
-    const [num1_t, operator_t, num2_t] = randomWrongItem.question.split(' ');
-    num1.value = num1_t;
-    operator.value = operator_t;
-    num2.value = num2_t;
-    result.value = Number(randomWrongItem.correct_answer);
-    return;
-  }
-
+function generate_new() {
   // 出新题
-  const operators = ['+', '-'];
   const randomOperator =
     operators[Math.floor(Math.random() * operators.length)];
   const num1_t = Math.floor(Math.random() * end_number.value - 1) + 1;
@@ -173,14 +180,37 @@ function generate() {
 
   if (randomOperator === '-') {
     [num1.value, num2.value] = [
-      Math.max(num1_t, num2_t).toString(),
-      Math.min(num1_t, num2_t).toString(),
+      Math.max(num1_t, num2_t),
+      Math.min(num1_t, num2_t),
     ];
   } else {
-    [num1.value, num2.value] = [num1_t.toString(), num2_t.toString()];
+    [num1.value, num2.value] = [num1_t, num2_t];
   }
   operator.value = randomOperator;
-  result.value = eval(`${num1.value} ${randomOperator} ${num2.value}`);
+  result.value = eval(`${num1.value} ${operator.value} ${num2.value}`);
+}
+
+function generate_wrong() {
+  // 五分之一的概率从错题集中出题
+  if (Math.random() < 0.2 && wrong_list.value.length > 0) {
+    const randomIndex = Math.floor(Math.random() * wrong_list.value.length);
+    const randomWrongItem = wrong_list.value[randomIndex];
+    const [num1_t, operator_t, num2_t] = [
+      randomWrongItem.num1,
+      randomWrongItem.operator,
+      randomWrongItem.num2,
+    ];
+    num1.value = num1_t;
+    operator.value = operator_t;
+    num2.value = num2_t;
+    result.value = eval(`${num1.value} ${operator.value} ${num2.value}`);
+    return;
+  }
+}
+
+function generate() {
+  generate_wrong();
+  generate_new();
 }
 
 // 计时器
@@ -194,7 +224,11 @@ setInterval(() => {
 
 // 延时检查输入答案
 function checkResult() {
-  display_result.value = input_result.value;
+  if (input_result.value !== null) {
+    display_result.value = input_result.value.toString();
+  } else {
+    display_result.value = '?';
+  }
   is_wrong = false;
 
   if (timeoutId) {
@@ -216,15 +250,18 @@ function checkResult() {
       }
       same_question = true;
       is_wrong = true;
-      wrong_list.value.push({
+      let wrong_item = {
         id: wrong_list.value.length + 1,
-        question: `${num1.value} ${operator.value} ${num2.value} = ${input_result.value}`,
+        num1: num1.value,
+        num2: num2.value,
+        operator: operator.value,
         wrong_answer: input_result.value,
-        correct_answer: result.value.toString(),
-      });
+      };
+      wrong_list.value.push(wrong_item);
+      need_retest.push(wrong_item);
     }
-    input_result.value = '';
-  }, 800);
+    input_result.value = null;
+  }, check_delay);
 }
 
 generate();
