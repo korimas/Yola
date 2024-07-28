@@ -33,6 +33,7 @@
         v-model="input_result"
         outlined
         dense
+        autofocus
         class="full-width"
         type="number"
         @update:model-value="checkResult"
