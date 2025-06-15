@@ -56,20 +56,18 @@
             <span class="result" :class="{ 'wrong-answer': display_wrong }">
               {{ display_result }}
             </span>
-            <transition name="bounce">
-              <q-icon
-                v-if="display_wrong"
-                name="close"
-                color="red"
-                class="wrong-icon"
-              />
-              <q-icon
-                v-else-if="display_correct"
-                name="check_circle"
-                color="green"
-                class="correct-icon"
-              />
-            </transition>
+            <q-icon
+              v-if="display_wrong"
+              name="close"
+              color="red"
+              class="wrong-icon"
+            />
+            <q-icon
+              v-else-if="display_correct"
+              name="check_circle"
+              color="green"
+              class="correct-icon"
+            />
           </div>
         </transition>
 
@@ -573,19 +571,19 @@ function applyDifficultySettings() {
       settings.value.minNumber = 1;
       settings.value.maxNumber = 10;
       settings.value.operators = ['+', '-'];
-      settings.value.targetScore = 10;
+      settings.value.targetScore = 50;
       break;
     case 'medium':
       settings.value.minNumber = 1;
       settings.value.maxNumber = 20;
       settings.value.operators = ['+', '-', '×'];
-      settings.value.targetScore = 15;
+      settings.value.targetScore = 100;
       break;
     case 'hard':
       settings.value.minNumber = 1;
       settings.value.maxNumber = 30;
       settings.value.operators = ['+', '-', '×', '÷'];
-      settings.value.targetScore = 20;
+      settings.value.targetScore = 150;
       break;
   }
 
@@ -616,15 +614,6 @@ function applySettings() {
 
   // 生成新题目
   generate();
-
-  // 显示提示
-  $q.notify({
-    message: '设置已应用，游戏重新开始！',
-    color: 'positive',
-    icon: 'check_circle',
-    position: 'top',
-    timeout: 2000,
-  });
 }
 
 // 重置统计数据
@@ -973,21 +962,13 @@ function showCompletionDialog() {
         </div>
       </div>`,
       html: true,
-      ok: '继续练习',
-      cancel: '重新开始',
+      ok: '重新开始',
       persistent: true,
-    })
-      .onOk(() => {
-        // 继续练习，重置部分状态
-        levelCompleted.value = false;
-        // 生成新题目
-        generate();
-      })
-      .onCancel(() => {
-        // 重新开始
-        resetStats();
-        generate();
-      });
+    }).onOk(() => {
+      // 重新开始
+      resetStats();
+      generate();
+    });
 
     // 播放完成音效
     playSound('levelUp');
@@ -1151,29 +1132,14 @@ function removeWrongItem(index: number) {
 
 // 清空错题列表
 function clearWrongList() {
-  $q.dialog({
-    title: '确认',
-    message: '确定要清空所有错题吗？',
-    cancel: true,
-    persistent: true,
-  }).onOk(() => {
-    wrong_list.value = [];
-    need_retest = [];
+  wrong_list.value = [];
+  need_retest = [];
 
-    // 如果当前正在做错题，则生成新题
-    if (insert_wrong !== null) {
-      insert_wrong = null;
-      generate();
-    }
-
-    // 显示提示
-    $q.notify({
-      message: '已清空所有错题',
-      color: 'info',
-      position: 'top',
-      timeout: 1000,
-    });
-  });
+  // 如果当前正在做错题，则生成新题
+  if (insert_wrong !== null) {
+    insert_wrong = null;
+    generate();
+  }
 }
 
 // 初始化
@@ -1204,7 +1170,6 @@ total_count.value += 1;
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 1.2rem;
   font-weight: bold;
 }
 
@@ -1221,12 +1186,7 @@ total_count.value += 1;
   margin-bottom: 20px;
 }
 
-.stat-chip {
-  font-size: 1.2rem;
-}
-
 .streak-chip {
-  font-size: 1.1rem;
   font-weight: bold;
   animation: pulse 1.5s infinite;
 }
@@ -1269,7 +1229,6 @@ total_count.value += 1;
 
 .result {
   font-size: 3.5rem;
-  min-width: 80px;
   text-align: center;
 
   &.wrong-answer {
@@ -1284,6 +1243,19 @@ total_count.value += 1;
   top: 50%;
   transform: translateY(-50%);
   font-size: 2.5rem;
+}
+
+@media (max-width: 600px) {
+  .wrong-icon,
+  .correct-icon {
+    position: relative;
+    right: auto;
+    top: auto;
+    transform: none;
+    font-size: 2rem;
+    margin-left: 10px;
+    display: inline-block;
+  }
 }
 
 /* 连续答对特效 */
@@ -1383,10 +1355,6 @@ total_count.value += 1;
   opacity: 0;
 }
 
-.bounce-enter-active {
-  animation: bounce-in 0.5s;
-}
-
 .slide-up-enter-active,
 .slide-up-leave-active {
   transition: all 0.5s ease;
@@ -1396,18 +1364,6 @@ total_count.value += 1;
 .slide-up-leave-to {
   opacity: 0;
   transform: translateY(30px) translateX(-50%);
-}
-
-@keyframes bounce-in {
-  0% {
-    transform: scale(0) translateY(-50%);
-  }
-  50% {
-    transform: scale(1.2) translateY(-50%);
-  }
-  100% {
-    transform: scale(1) translateY(-50%);
-  }
 }
 
 @keyframes slideDown {
