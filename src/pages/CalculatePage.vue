@@ -4,12 +4,12 @@
       <!-- 游戏模式顶部信息 -->
       <div v-if="settings.gameMode" class="game-header">
         <div class="streak-badge">
-          <q-icon name="whatshot" size="md" color="orange" />
+          <q-icon name="whatshot" color="orange" />
           <span>连续答对: {{ gameStats.streak }}</span>
         </div>
 
         <div class="max-streak-badge">
-          <q-icon name="emoji_events" size="md" color="amber" />
+          <q-icon name="emoji_events" color="amber" />
           <span>最高连击: {{ gameStats.maxStreak }}</span>
         </div>
       </div>
@@ -17,9 +17,9 @@
       <!-- 统计信息行 -->
       <div class="row stats-row">
         <q-chip square class="stat-chip">
-          <q-avatar color="green" text-color="white" size="lg">{{
-            correct_count
-          }}</q-avatar>
+          <q-avatar color="green" text-color="white">
+            {{ correct_count }}
+          </q-avatar>
           <span class="stat-label">答对</span>
         </q-chip>
 
@@ -40,9 +40,7 @@
           class="stat-chip"
           @click="WrongListDrawerOpen = !WrongListDrawerOpen"
         >
-          <q-avatar color="red" text-color="white" size="lg">{{
-            wrong_count
-          }}</q-avatar>
+          <q-avatar color="red" text-color="white">{{ wrong_count }}</q-avatar>
           <span class="stat-label">答错</span>
         </q-chip>
       </div>
@@ -55,20 +53,18 @@
             <span class="operator">{{ current_quesstion.operator }}</span>
             <span class="number">{{ current_quesstion.num2 }}</span>
             <span class="equals">=</span>
-            <span class="result" :class="{ 'wrong-answer': display_wrong }">{{
-              display_result
-            }}</span>
+            <span class="result" :class="{ 'wrong-answer': display_wrong }">
+              {{ display_result }}
+            </span>
             <transition name="bounce">
               <q-icon
                 v-if="display_wrong"
-                size="xl"
                 name="close"
                 color="red"
                 class="wrong-icon"
               />
               <q-icon
                 v-else-if="display_correct"
-                size="xl"
                 name="check_circle"
                 color="green"
                 class="correct-icon"
@@ -94,7 +90,6 @@
           class="answer-input"
           type="number"
           @update:model-value="checkResult"
-          :disable="display_correct"
         >
           <template v-slot:before>
             <div class="input-label">解答:</div>
@@ -1123,7 +1118,7 @@ function checkResult() {
     input_result.value = null;
 
     // 自动聚焦输入框
-    if (settings.value.autoFocus && !display_correct.value) {
+    if (settings.value.autoFocus) {
       focusAnswerInput();
     }
   }, settings.value.checkDelay);
