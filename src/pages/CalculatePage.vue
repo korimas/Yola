@@ -1238,24 +1238,8 @@ total_count.value += 1;
 
 .wrong-icon,
 .correct-icon {
-  position: absolute;
-  right: -40px;
-  top: 50%;
   transform: translateY(-50%);
   font-size: 2.5rem;
-}
-
-@media (max-width: 600px) {
-  .wrong-icon,
-  .correct-icon {
-    position: relative;
-    right: auto;
-    top: auto;
-    transform: none;
-    font-size: 2rem;
-    margin-left: 10px;
-    display: inline-block;
-  }
 }
 
 /* 连续答对特效 */
