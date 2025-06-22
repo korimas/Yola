@@ -8,6 +8,7 @@
           <q-tab name="shengmu" label="声母" />
           <q-tab name="yunmu" label="韵母" />
           <q-tab name="zhengti" label="整体认读" />
+          <q-tab name="random" label="随机学习" />
           <q-tab name="review" label="复习" />
         </q-tabs>
       </div>
@@ -212,6 +213,100 @@
                 @click="nextItem('zhengti')"
                 color="primary"
                 label="下一个"
+              />
+            </div>
+          </div>
+        </q-tab-panel>
+
+        <!-- 随机学习模式 -->
+        <q-tab-panel name="random">
+          <div class="random-section">
+            <h5 class="text-center q-mb-md">随机学习</h5>
+            <div class="random-stats q-mb-lg">
+              <q-card class="stats-card">
+                <q-card-section>
+                  <div class="row q-gutter-md">
+                    <div class="col text-center">
+                      <div class="text-h6">{{ randomSessionCount }}</div>
+                      <div class="text-caption">本次已学</div>
+                    </div>
+                    <div class="col text-center">
+                      <div class="text-h6">{{ randomCorrectCount }}</div>
+                      <div class="text-caption">答对次数</div>
+                    </div>
+                    <div class="col text-center">
+                      <div class="text-h6">{{ randomAccuracy }}%</div>
+                      <div class="text-caption">正确率</div>
+                    </div>
+                  </div>
+                </q-card-section>
+              </q-card>
+            </div>
+
+            <div v-if="currentRandomItem" class="random-item">
+              <q-card class="pinyin-card q-mb-lg">
+                <q-card-section class="text-center">
+                  <div class="pinyin-display q-mb-md">
+                    <div class="pinyin-image">{{ currentRandomItem.emoji }}</div>
+                    <span class="pinyin-text">{{ currentRandomItem.pinyin }}</span>
+                  </div>
+                  <div class="pinyin-info q-mb-md">
+                    <p class="text-h6">{{ currentRandomItem.name }}</p>
+                    <p class="text-body2">{{ currentRandomItem.description }}</p>
+                  </div>
+                  <div class="examples q-mb-md">
+                    <p class="text-subtitle2">例字:</p>
+                    <div class="example-words">
+                      <q-chip
+                        v-for="example in currentRandomItem.examples"
+                        :key="example"
+                        color="primary"
+                        text-color="white"
+                        class="q-ma-xs"
+                      >
+                        {{ example }}
+                      </q-chip>
+                    </div>
+                  </div>
+                  <div class="audio-section q-mb-md">
+                    <q-btn
+                      @click="playAudio(currentRandomItem.pinyin)"
+                      color="secondary"
+                      icon="volume_up"
+                      label="发音"
+                      class="q-mr-sm"
+                    />
+                  </div>
+                </q-card-section>
+              </q-card>
+              <div class="action-buttons text-center">
+                <q-btn
+                  @click="randomAnswer(true)"
+                  color="positive"
+                  label="认识"
+                  class="q-mr-md"
+                />
+                <q-btn
+                  @click="randomAnswer(false)"
+                  color="negative"
+                  label="不认识"
+                  class="q-mr-md"
+                />
+                <q-btn
+                  @click="nextRandomItem()"
+                  color="primary"
+                  label="下一个"
+                />
+              </div>
+            </div>
+
+            <div v-else class="text-center q-pa-lg">
+              <q-btn
+                @click="startRandomLearning()"
+                color="primary"
+                size="lg"
+                label="开始随机学习"
+                icon="shuffle"
               />
             </div>
           </div>
@@ -865,15 +960,17 @@ const learningRecords = ref<LearningRecord[]>([]);
 const currentReviewItem = ref<LearningRecord | null>(null);
 const showAnswer = ref(false);
 
+// 随机学习相关
+const currentRandomItem = ref<PinyinItemWithType | null>(null);
+const randomSessionCount = ref(0);
+const randomCorrectCount = ref(0);
+const allPinyinItems = ref<PinyinItemWithType[]>([]);
+const usedRandomItems = ref<Set<string>>(new Set());
+
 // 计算属性
 const learningProgress = computed(() => {
-  const totalItems =
-    shengmuList.value.length +
-    yunmuList.value.length +
-    zhengtiList.value.length;
-  const learnedItems = learningRecords.value.filter(
-    (record) => record.isLearned
-  ).length;
+  const totalItems = shengmuList.value.length + yunmuList.value.length + zhengtiList.value.length;
+  const learnedItems = learningRecords.value.filter(record => record.isLearned).length;
   return totalItems > 0 ? learnedItems / totalItems : 0;
 });
 
@@ -891,6 +988,11 @@ const masteredCount = computed(() => {
 
 const totalLearned = computed(() => {
   return learningRecords.value.filter((record) => record.isLearned).length;
+});
+
+const randomAccuracy = computed(() => {
+  if (randomSessionCount.value === 0) return 0;
+  return Math.round((randomCorrectCount.value / randomSessionCount.value) * 100);
 });
 
 // 拼音音频文件路径映射表
@@ -1067,6 +1169,10 @@ interface PinyinItem {
   emoji: string; // 对应的emoji
 }
 
+interface PinyinItemWithType extends PinyinItem {
+  type: 'shengmu' | 'yunmu' | 'zhengti';
+}
+
 const updateLearningRecord = (
   item: PinyinItem,
   type: 'shengmu' | 'yunmu' | 'zhengti',
@@ -1192,10 +1298,64 @@ const loadLearningRecords = () => {
   }
 };
 
+// 随机学习方法
+const initializeAllPinyinItems = () => {
+  allPinyinItems.value = [
+    ...shengmuList.value.map(item => ({ ...item, type: 'shengmu' as const })),
+    ...yunmuList.value.map(item => ({ ...item, type: 'yunmu' as const })),
+    ...zhengtiList.value.map(item => ({ ...item, type: 'zhengti' as const }))
+  ];
+};
+
+const startRandomLearning = () => {
+  randomSessionCount.value = 0;
+  randomCorrectCount.value = 0;
+  usedRandomItems.value.clear();
+  nextRandomItem();
+};
+
+const nextRandomItem = () => {
+  if (usedRandomItems.value.size >= allPinyinItems.value.length) {
+    // 所有项目都已学习过，重置
+    usedRandomItems.value.clear();
+  }
+  
+  const availableItems = allPinyinItems.value.filter(
+    item => !usedRandomItems.value.has(item.pinyin)
+  );
+  
+  if (availableItems.length > 0) {
+    const randomIndex = Math.floor(Math.random() * availableItems.length);
+    currentRandomItem.value = availableItems[randomIndex];
+    usedRandomItems.value.add(availableItems[randomIndex].pinyin);
+  }
+};
+
+const randomAnswer = (isCorrect: boolean) => {
+  randomSessionCount.value++;
+  if (isCorrect) {
+    randomCorrectCount.value++;
+  }
+  
+  // 更新学习记录
+  if (currentRandomItem.value) {
+    const type = currentRandomItem.value.type;
+    updateLearningRecord(currentRandomItem.value, type, isCorrect);
+  }
+  
+  // 自动跳转到下一个
+  setTimeout(() => {
+    nextRandomItem();
+  }, 500);
+};
+
+
+
 // 生命周期
 onMounted(() => {
   loadLearningRecords();
   loadNextReviewItem();
+  initializeAllPinyinItems();
 });
 </script>
 

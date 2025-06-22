@@ -800,10 +800,8 @@ function showCorrectAnimation() {
 // 自动聚焦输入框
 function focusAnswerInput() {
   nextTick(() => {
-    const inputEl = answerInput.value as unknown as {
-      focus: () => void;
-    } | null;
-    if (inputEl && typeof inputEl.focus === 'function') {
+    const inputEl = answerInput.value;
+    if (inputEl && 'focus' in inputEl && typeof inputEl.focus === 'function') {
       inputEl.focus();
     }
   });
