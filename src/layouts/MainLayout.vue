@@ -66,7 +66,6 @@ const linksList: EssentialLinkProps[] = [
     title: '拼音',
     icon: 'flutter_dash',
     link: '/pinyin',
-    disable: true,
   },
 ];
 

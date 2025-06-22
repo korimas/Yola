@@ -470,9 +470,9 @@ let settings = ref<CalculateSettings>({
 
 // 难度选项
 const difficultyOptions = [
-  { label: '简单 (3-4岁)', value: 'easy' },
-  { label: '中等 (4-5岁)', value: 'medium' },
-  { label: '困难 (5-6岁)', value: 'hard' },
+  { label: '简单', value: 'easy' },
+  { label: '中等', value: 'medium' },
+  { label: '困难', value: 'hard' },
 ];
 
 // 记忆曲线
