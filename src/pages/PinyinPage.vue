@@ -898,7 +898,7 @@ const getAudioPath = (
   pinyin: string,
   type: 'initials' | 'finals' | 'syllables'
 ): string => {
-  const baseUrl = '/src/assets/';
+  const baseUrl = '/pinyin/';
 
   switch (type) {
     case 'initials':
