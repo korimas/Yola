@@ -856,6 +856,7 @@ interface LearningRecord {
   lastReview: Date; // 上次复习时间
   isLearned: boolean; // 是否已学习
   isMastered: boolean; // 是否已掌握
+  emoji: string; // 对应的emoji
 }
 
 const learningRecords = ref<LearningRecord[]>([]);
@@ -1063,6 +1064,7 @@ interface PinyinItem {
   name: string;
   description: string;
   examples: string[];
+  emoji: string; // 对应的emoji
 }
 
 const updateLearningRecord = (
@@ -1088,6 +1090,7 @@ const updateLearningRecord = (
       lastReview: new Date(),
       isLearned: false,
       isMastered: false,
+      emoji: item.emoji,
     };
     learningRecords.value.push(record);
   }
